@@ -1,10 +1,16 @@
 import os
-import time
-from datetime import datetime
+import sys
+from pathlib import Path
 
+# Fix the import path so Streamlit can find the 'modules' folder
+current_dir = Path(__file__).resolve().parent
+if str(current_dir) not in sys.path:
+    sys.path.insert(0, str(current_dir))
+
+# Your original imports continue below here...
 import streamlit as st
-
 from modules import i18n
+
 from modules.ai_engine import analyze_message
 from modules.email_analyzer import parse_email_bytes, parse_pasted_text
 from modules.findings import GROUPS, severity
