@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 from pathlib import Path
 
 # This forces Python to look at both the repository root AND the nested application folder
@@ -117,8 +118,6 @@ def render_findings_list(findings, max_show=None):
     for f in shown:
         title, why = render_finding(f, L())
         sev = severity(f["weight"])
-        ev = "".join(f"<div><code>{st.session_state.get('_e', lambda s: s)(x)}</code></div>"
-                     for x in [])  # placeholder unused
         badge = (f'<span class="pill pill-{sev}">{sev_label(f["weight"], L())}</span> '
                  if f["weight"] > 0 else "")
         cnt = f" ({_( 'occurs_n', n=f['count'])})" if f.get("count", 1) > 1 else ""
@@ -199,8 +198,12 @@ def try_pdf(result, parsed, ip_results=None, ti_results=None, timeline=None):
 def maybe_ai_opinion(parsed, result, enabled):
     if not enabled:
         return None
-    api_key = os.environ.get("ANTHROPIC_API_KEY") or st.secrets.get("ANTHROPIC_API_KEY", None) \
-        if hasattr(st, "secrets") else os.environ.get("ANTHROPIC_API_KEY")
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key and hasattr(st, "secrets"):
+        try:
+            api_key = st.secrets.get("ANTHROPIC_API_KEY", None)
+        except Exception:
+            api_key = None
     if not api_key:
         st.info(_("ai_disabled"))
         return None
@@ -429,7 +432,7 @@ with tab_watch:
         placeholder = st.empty()
         with placeholder.container():
             st.caption(_("watch_connecting") if not state["last_check"] else "")
-        time.sleep(30)
+        time.sleep(every)
         run_cycle(state, host, user, pw, check_certs=False)
         st.rerun()
 
