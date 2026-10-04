@@ -2,13 +2,17 @@ import os
 import sys
 from pathlib import Path
 
-# Fix the import path so Streamlit can find the 'modules' folder
-current_dir = Path(__file__).resolve().parent
-if str(current_dir) not in sys.path:
-    sys.path.insert(0, str(current_dir))
+# This forces Python to look at both the repository root AND the nested application folder
+repo_root = Path(__file__).resolve().parent.parent
+app_dir = Path(__file__).resolve().parent
+
+for path in [str(repo_root), str(app_dir)]:
+    if path not in sys.path:
+        sys.path.insert(0, path)
 
 # Your original imports continue below here...
 import streamlit as st
+
 from modules import i18n
 
 from modules.ai_engine import analyze_message
